@@ -40,11 +40,21 @@ export default function App() {
 
   const fetchData = async() => {
     // 1. Implement this function
-    
+    const res = await fetch(API_URL);
+    if (!res.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const json = await res.json();
     // Fetch the menu from the API_URL endpoint. You can visit the API_URL in your browser to inspect the data returned
     // The category field comes as an object with a property called "title". You just need to get the title value and set it under the key "category".
     // So the server response should be slighly transformed in this function (hint: map function) to flatten out each menu item in the array,
-    return [];
+    const transformedData = json.menu.map(item => ({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      category: item.category.title
+    }));
+    return transformedData;
   }
 
   useEffect(() => {

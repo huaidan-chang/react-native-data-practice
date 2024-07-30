@@ -30,8 +30,16 @@ export async function getMenuItems() {
 export function saveMenuItems(menuItems) {
   db.transaction((tx) => {
     // 2. Implement a single SQL statement to save all menu data in a table called menuitems.
+    const insertQuery = 'INSERT INTO menuitems (uuid, title, price, category) VALUES (?, ?, ?, ?);';
     // Check the createTable() function above to see all the different columns the table has
     // Hint: You need a SQL statement to insert multiple rows at once.
+    menuItems.forEach(item => {
+      const { id, title, price, category } = item; // Assuming each item has id, title, price, category
+      tx.executeSql(insertQuery, [id.toString(), title, price, category], 
+        () => console.log("Item inserted successfully: ", title),
+        (_, error) => console.error("Failed to insert item: ", title, error)
+      );
+    });
   });
 }
 
