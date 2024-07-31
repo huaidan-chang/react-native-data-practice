@@ -35,7 +35,7 @@ export function saveMenuItems(menuItems) {
     // Hint: You need a SQL statement to insert multiple rows at once.
     menuItems.forEach(item => {
       const { id, title, price, category } = item; // Assuming each item has id, title, price, category
-      tx.executeSql(insertQuery, [id.toString(), title, price, category], 
+      tx.executeSql(insertQuery, [id.toString(), title, price, category],
         () => console.log("Item inserted successfully: ", title),
         (_, error) => console.error("Failed to insert item: ", title, error)
       );
@@ -65,6 +65,25 @@ export function saveMenuItems(menuItems) {
  */
 export async function filterByQueryAndCategories(query, activeCategories) {
   return new Promise((resolve, reject) => {
-    resolve(SECTION_LIST_MOCK_DATA);
+    const likeQuery = '%' + query + '%';
+    const categoriesList = activeCategories.map(category => `'${category}'`).join(', ');
+
+    const sqlQuery = `
+        SELECT * FROM menuitems
+        WHERE title LIKE ? AND category IN (${categoriesList})
+    `;
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        sqlQuery, [likeQuery],
+        (_, { rows }) => {
+          resolve(rows._array);
+        },
+        (_, error) => {
+          console.error("Error fetching filtered menu items:", error);
+          reject("Failed to retrieve items");
+        }
+      );
+    });
   });
 }
